@@ -5,6 +5,10 @@ pipeline {
         jdk 'JDK-11'  // Use JDK-11 or the name of your Java 11 installation in Jenkins
     }
 
+    environment {
+        SELENIUM_REMOTE_URL = 'http://66.42.83.123:4444/wd/hub'
+    }
+
     stages {
         stage('Checkout') {
             steps {
