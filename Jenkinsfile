@@ -16,17 +16,17 @@ pipeline {
             steps {
                 script {
                     def javaHome = tool 'JDK-11'
-                    env.JAVA_HOME = "${javaHome}"
-                    env.PATH = "${javaHome}/bin:${env.PATH}"
+                    withEnv(["JAVA_HOME=${javaHome}", "PATH=${javaHome}/bin:${env.PATH}"]) {
+                        sh '''
+                            echo "Java version:"
+                            java -version
+                            echo "JAVA_HOME: $JAVA_HOME"
+                            echo "Maven Java version:"
+                            mvn -version
+                            mvn -Dmaven.test.failure.ignore=true clean package
+                        '''
+                    }
                 }
-                sh '''
-                    echo "Java version:"
-                    java -version
-                    echo "JAVA_HOME: $JAVA_HOME"
-                    echo "Maven Java version:"
-                    mvn -version
-                    mvn -Dmaven.test.failure.ignore=true clean package
-                '''
             }
             post {
                 success {
@@ -39,16 +39,16 @@ pipeline {
             steps {
                 script {
                     def javaHome = tool 'JDK-11'
-                    env.JAVA_HOME = "${javaHome}"
-                    env.PATH = "${javaHome}/bin:${env.PATH}"
-                }
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    sh '''
-                        echo "Java version:"
-                        java -version
-                        echo "JAVA_HOME: $JAVA_HOME"
-                        mvn clean test -Dsurefire.suiteXmlFiles=src/test/testrunners/testng_regressions.xml
-                    '''
+                    withEnv(["JAVA_HOME=${javaHome}", "PATH=${javaHome}/bin:${env.PATH}"]) {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                            sh '''
+                                echo "Java version:"
+                                java -version
+                                echo "JAVA_HOME: $JAVA_HOME"
+                                mvn clean test -Dsurefire.suiteXmlFiles=src/test/testrunners/testng_regressions.xml
+                            '''
+                        }
+                    }
                 }
             }
             post {
