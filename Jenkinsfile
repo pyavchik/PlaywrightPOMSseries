@@ -36,6 +36,8 @@ pipeline {
                             java -version
                             echo "Maven Java version:"
                             mvn -version
+                            echo "Installing Playwright browsers..."
+                            mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install chromium" || true
                             mvn -Dmaven.test.failure.ignore=true clean package
                         """
                     }
@@ -71,6 +73,8 @@ pipeline {
                                 echo "Java Home: \$JAVA_HOME"
                                 echo "Java version:"
                                 java -version
+                                echo "Installing Playwright browsers if needed..."
+                                mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install chromium" || true
                                 mvn clean test -Dsurefire.suiteXmlFiles=src/test/testrunners/testng_regressions.xml
                             """
                         }
