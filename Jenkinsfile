@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        jdk 'JDK-11'  // Use JDK-11 or the name of your Java 11 installation in Jenkins
+    }
+
     stages {
         stage('Checkout') {
             steps {
