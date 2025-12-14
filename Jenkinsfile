@@ -5,6 +5,11 @@ pipeline {
         jdk 'JDK-11'  // Use JDK-11 or the name of your Java 11 installation in Jenkins
     }
 
+    environment {
+        JAVA_HOME = "${tool 'JDK-11'}"
+        PATH = "${tool 'JDK-11'}/bin:${env.PATH}"
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -14,7 +19,12 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh "mvn -Dmaven.test.failure.ignore=true clean package"
+                sh '''
+                    echo "Java version:"
+                    java -version
+                    echo "JAVA_HOME: $JAVA_HOME"
+                    mvn -Dmaven.test.failure.ignore=true clean package
+                '''
             }
             post {
                 success {
@@ -26,7 +36,11 @@ pipeline {
         stage('Regression Automation Test') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    sh "mvn clean test -Dsurefire.suiteXmlFiles=src/test/testrunners/testng_regressions.xml"
+                    sh '''
+                        echo "Java version:"
+                        java -version
+                        mvn clean test -Dsurefire.suiteXmlFiles=src/test/testrunners/testng_regressions.xml
+                    '''
                 }
             }
             post {
