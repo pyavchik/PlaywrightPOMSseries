@@ -15,14 +15,25 @@ pipeline {
         stage('Build') {
             steps {
                 script {
+                    // Try to get JDK from tool, or find Java 17 directly
                     def javaHome = tool 'JDK-11'
+                    if (!javaHome || javaHome.isEmpty()) {
+                        // Fallback: find Java 17 installation
+                        javaHome = sh(
+                            script: 'find /usr/lib/jvm -name "java-17*" -type d | head -1 || find /opt -name "java-17*" -type d | head -1 || echo ""',
+                            returnStdout: true
+                        ).trim()
+                    }
+                    if (!javaHome || javaHome.isEmpty()) {
+                        error "Java 11/17 not found. Please configure JDK-11 tool in Jenkins or install Java 17."
+                    }
                     withEnv(["JAVA_HOME=${javaHome}", "PATH+JDK=${javaHome}/bin"]) {
                         sh """
                             export JAVA_HOME=${javaHome}
                             export PATH=${javaHome}/bin:\$PATH
+                            echo "Java Home: \$JAVA_HOME"
                             echo "Java version:"
                             java -version
-                            echo "JAVA_HOME: \$JAVA_HOME"
                             echo "Maven Java version:"
                             mvn -version
                             mvn -Dmaven.test.failure.ignore=true clean package
@@ -40,15 +51,26 @@ pipeline {
         stage('Regression Automation Test') {
             steps {
                 script {
+                    // Try to get JDK from tool, or find Java 17 directly
                     def javaHome = tool 'JDK-11'
+                    if (!javaHome || javaHome.isEmpty()) {
+                        // Fallback: find Java 17 installation
+                        javaHome = sh(
+                            script: 'find /usr/lib/jvm -name "java-17*" -type d | head -1 || find /opt -name "java-17*" -type d | head -1 || echo ""',
+                            returnStdout: true
+                        ).trim()
+                    }
+                    if (!javaHome || javaHome.isEmpty()) {
+                        error "Java 11/17 not found. Please configure JDK-11 tool in Jenkins or install Java 17."
+                    }
                     withEnv(["JAVA_HOME=${javaHome}", "PATH+JDK=${javaHome}/bin"]) {
                         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                             sh """
                                 export JAVA_HOME=${javaHome}
                                 export PATH=${javaHome}/bin:\$PATH
+                                echo "Java Home: \$JAVA_HOME"
                                 echo "Java version:"
                                 java -version
-                                echo "JAVA_HOME: \$JAVA_HOME"
                                 mvn clean test -Dsurefire.suiteXmlFiles=src/test/testrunners/testng_regressions.xml
                             """
                         }
