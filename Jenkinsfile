@@ -16,7 +16,7 @@ pipeline {
             steps {
                 script {
                     def javaHome = tool 'JDK-11'
-                    withEnv(["JAVA_HOME=${javaHome}", "PATH=${javaHome}/bin:${env.PATH}"]) {
+                    withEnv(["JAVA_HOME=${javaHome}", "PATH+JDK=${javaHome}/bin"]) {
                         sh '''
                             echo "Java version:"
                             java -version
@@ -39,7 +39,7 @@ pipeline {
             steps {
                 script {
                     def javaHome = tool 'JDK-11'
-                    withEnv(["JAVA_HOME=${javaHome}", "PATH=${javaHome}/bin:${env.PATH}"]) {
+                    withEnv(["JAVA_HOME=${javaHome}", "PATH+JDK=${javaHome}/bin"]) {
                         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                             sh '''
                                 echo "Java version:"
