@@ -17,14 +17,16 @@ pipeline {
                 script {
                     def javaHome = tool 'JDK-11'
                     withEnv(["JAVA_HOME=${javaHome}", "PATH+JDK=${javaHome}/bin"]) {
-                        sh '''
+                        sh """
+                            export JAVA_HOME=${javaHome}
+                            export PATH=${javaHome}/bin:\$PATH
                             echo "Java version:"
                             java -version
-                            echo "JAVA_HOME: $JAVA_HOME"
+                            echo "JAVA_HOME: \$JAVA_HOME"
                             echo "Maven Java version:"
                             mvn -version
                             mvn -Dmaven.test.failure.ignore=true clean package
-                        '''
+                        """
                     }
                 }
             }
@@ -41,12 +43,14 @@ pipeline {
                     def javaHome = tool 'JDK-11'
                     withEnv(["JAVA_HOME=${javaHome}", "PATH+JDK=${javaHome}/bin"]) {
                         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                            sh '''
+                            sh """
+                                export JAVA_HOME=${javaHome}
+                                export PATH=${javaHome}/bin:\$PATH
                                 echo "Java version:"
                                 java -version
-                                echo "JAVA_HOME: $JAVA_HOME"
+                                echo "JAVA_HOME: \$JAVA_HOME"
                                 mvn clean test -Dsurefire.suiteXmlFiles=src/test/testrunners/testng_regressions.xml
-                            '''
+                            """
                         }
                     }
                 }
